@@ -71,8 +71,8 @@ export function processScript(entryScript: ScriptInfo, readScript: readScript, p
 			});
 	}
 
-	// build the bundle
-	buildScript(result, entryScript, readScript, path);
+	// build the script
+	result = buildScript(result, entryScript, readScript, path);
 
 	return stripBom(result).trim();
 }
@@ -87,7 +87,7 @@ interface ProcessedScriptMap
 }
 
 // TODO: typings for StringBuilder
-function buildScript(result: string, entryScript: ScriptInfo, readScript: readScript, path: path): void
+function buildScript(result: string, entryScript: ScriptInfo, readScript: readScript, path: path): string
 {
 	let allScripts: ScriptMap = {};
 	let processedScripts: ProcessedScriptMap = {};
@@ -96,6 +96,8 @@ function buildScript(result: string, entryScript: ScriptInfo, readScript: readSc
 	let fullScript = insertSortedIncludes(entryScript, readScript, path, ancestors, processedScripts, allScripts);
 
 	result = appendLine(result, fullScript);
+
+	return result;
 }
 
 function insertSortedIncludes(currentScript: ScriptInfo, readScript: readScript, path: path, currentScriptAncestors: ProcessedScriptMap, processedScripts: ProcessedScriptMap, allScripts: ScriptMap): string

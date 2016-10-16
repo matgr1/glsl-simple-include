@@ -33,8 +33,8 @@ function processScript(entryScript, readScript, path, preprocessorDefines) {
             result = appendLine(result, "#define " + define);
         });
     }
-    // build the bundle
-    buildScript(result, entryScript, readScript, path);
+    // build the script
+    result = buildScript(result, entryScript, readScript, path);
     return stripBom(result).trim();
 }
 exports.processScript = processScript;
@@ -45,6 +45,7 @@ function buildScript(result, entryScript, readScript, path) {
     var ancestors = {};
     var fullScript = insertSortedIncludes(entryScript, readScript, path, ancestors, processedScripts, allScripts);
     result = appendLine(result, fullScript);
+    return result;
 }
 function insertSortedIncludes(currentScript, readScript, path, currentScriptAncestors, processedScripts, allScripts) {
     var scriptIncludes = getScriptIncludes(currentScript, readScript, path, allScripts);
