@@ -1,8 +1,6 @@
 import { assign } from "lodash";
 
-// TODO: typings for StringBuilder and string-bom
 declare let require: any;
-let StringBuilder = require("stringbuilder");
 let stripBom = require("strip-bom");
 
 export interface ScriptInfo
@@ -61,22 +59,22 @@ export function processScript(entryScript: ScriptInfo, readScript: readScript, p
 	}
 
 	// append version and preprocessor macros
-	let result = new StringBuilder({ newline: shaderNewLine });
-	result.appendLine(versionString);
+	let result = "";
+	result = appendLine(result, versionString);
 
 	if ((null !== preprocessorDefines) && (undefined !== preprocessorDefines))
 	{
 		preprocessorDefines.forEach(
 			function (define)
 			{
-				result.appendLine(`#define ${define}`);
+				result = appendLine(result, `#define ${define}`);
 			});
 	}
 
 	// build the bundle
 	buildScript(result, entryScript, readScript, path);
 
-	return stripBom(result.getValue()).trim();
+	return stripBom(result).trim();
 }
 
 interface ScriptMap
@@ -89,7 +87,7 @@ interface ProcessedScriptMap
 }
 
 // TODO: typings for StringBuilder
-function buildScript(result: any, entryScript: ScriptInfo, readScript: readScript, path: path): void
+function buildScript(result: string, entryScript: ScriptInfo, readScript: readScript, path: path): void
 {
 	let allScripts: ScriptMap = {};
 	let processedScripts: ProcessedScriptMap = {};
@@ -97,7 +95,7 @@ function buildScript(result: any, entryScript: ScriptInfo, readScript: readScrip
 
 	let fullScript = insertSortedIncludes(entryScript, readScript, path, ancestors, processedScripts, allScripts);
 
-	result.appendLine(fullScript);
+	result = appendLine(result, fullScript);
 }
 
 function insertSortedIncludes(currentScript: ScriptInfo, readScript: readScript, path: path, currentScriptAncestors: ProcessedScriptMap, processedScripts: ProcessedScriptMap, allScripts: ScriptMap): string
@@ -212,4 +210,9 @@ function readShaderScript(path: string, readScript: readScript): string
 function fixLineEndings(source: string)
 {
 	return source.replace("\r\n", shaderNewLine);
+}
+
+function appendLine(value: string, newLine: string) : string
+{
+	return value + newLine + shaderNewLine;
 }

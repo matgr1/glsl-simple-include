@@ -1,6 +1,5 @@
 "use strict";
 var lodash_1 = require("lodash");
-var StringBuilder = require("stringbuilder");
 var stripBom = require("strip-bom");
 var shaderNewLine = "\n";
 function processFile(entryPath, readScript, path, preprocessorDefines) {
@@ -27,16 +26,16 @@ function processScript(entryScript, readScript, path, preprocessorDefines) {
         entryScript.script = entryScript.script.substr(afterVersionIndex);
     }
     // append version and preprocessor macros
-    var result = new StringBuilder({ newline: shaderNewLine });
-    result.appendLine(versionString);
+    var result = "";
+    result = appendLine(result, versionString);
     if ((null !== preprocessorDefines) && (undefined !== preprocessorDefines)) {
         preprocessorDefines.forEach(function (define) {
-            result.appendLine("#define " + define);
+            result = appendLine(result, "#define " + define);
         });
     }
     // build the bundle
     buildScript(result, entryScript, readScript, path);
-    return stripBom(result.getValue()).trim();
+    return stripBom(result).trim();
 }
 exports.processScript = processScript;
 // TODO: typings for StringBuilder
@@ -45,7 +44,7 @@ function buildScript(result, entryScript, readScript, path) {
     var processedScripts = {};
     var ancestors = {};
     var fullScript = insertSortedIncludes(entryScript, readScript, path, ancestors, processedScripts, allScripts);
-    result.appendLine(fullScript);
+    result = appendLine(result, fullScript);
 }
 function insertSortedIncludes(currentScript, readScript, path, currentScriptAncestors, processedScripts, allScripts) {
     var scriptIncludes = getScriptIncludes(currentScript, readScript, path, allScripts);
@@ -115,5 +114,8 @@ function readShaderScript(path, readScript) {
 }
 function fixLineEndings(source) {
     return source.replace("\r\n", shaderNewLine);
+}
+function appendLine(value, newLine) {
+    return value + newLine + shaderNewLine;
 }
 //# sourceMappingURL=glsl-simple-include.js.map

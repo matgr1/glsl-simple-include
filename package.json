@@ -1,6 +1,6 @@
 {
   "name": "glsl-simple-include",
-  "version": "0.0.0",
+  "version": "0.0.3",
   "description": "Support for a simple \"#pragma include\" directive int shader files",
   "keywords": [
     "glsl"
@@ -24,7 +24,6 @@
   "dependencies": {
     "@types/lodash": "^4.14.37",
     "lodash": "4.16.4",
-    "stringbuilder": "0.0.11",
     "strip-bom": "3.0.0"
   },
   "scripts": {
