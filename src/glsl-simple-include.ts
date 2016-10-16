@@ -1,17 +1,10 @@
-import { assign } from "lodash";
-
 declare let require: any;
+
+require("babel-polyfill");
+
 let stripBom = require("strip-bom");
 
-export interface ScriptInfo
-{
-	script: string;
-	scriptFilePath: string;
-	scriptFolderPath: string;
-	scriptFileName: string;
-}
-
-export type readScript = (path: string) => string;
+export type readScript = (path: string) => Promise<string>;
 
 export interface path
 {
@@ -22,15 +15,23 @@ export interface path
 
 const shaderNewLine = "\n";
 
-export function processFile(entryPath: string, readScript: readScript, path: path, preprocessorDefines?: string[]): string
+export async function processIncludes(
+	readScript: readScript,
+	path: path,
+	entryScriptPath: string,
+	entryScript?: string,
+	preprocessorDefines?: string[]): Promise<string>
 {
-	let entryFilePath = path.resolve(entryPath);
+	let entryFilePath = path.resolve(entryScriptPath);
 	let entryFolderPath = path.dirname(entryFilePath);
 	let entryFileName = path.basename(entryFilePath);
 
-	let entryScript = readShaderScript(entryFilePath, readScript);
+	if ((null === entryScript) || (undefined === entryScript))
+	{
+		entryScript = await readShaderScript(entryFilePath, readScript);
+	}
 
-	return processScript(
+	return await processScript(
 		{
 			script: entryScript,
 			scriptFilePath: entryFilePath,
@@ -42,7 +43,19 @@ export function processFile(entryPath: string, readScript: readScript, path: pat
 		preprocessorDefines);
 }
 
-export function processScript(entryScript: ScriptInfo, readScript: readScript, path: path, preprocessorDefines?: string[]): string
+interface ScriptInfo
+{
+	script: string;
+	scriptFilePath: string;
+	scriptFolderPath: string;
+	scriptFileName: string;
+}
+
+async function processScript(
+	entryScript: ScriptInfo,
+	readScript: readScript,
+	path: path,
+	preprocessorDefines?: string[]): Promise<string>
 {
 	// strip version
 	let versionString: string = null;
@@ -72,7 +85,7 @@ export function processScript(entryScript: ScriptInfo, readScript: readScript, p
 	}
 
 	// build the script
-	result = buildScript(result, entryScript, readScript, path);
+	result = await buildScript(result, entryScript, readScript, path);
 
 	return stripBom(result).trim();
 }
@@ -86,23 +99,28 @@ interface ProcessedScriptMap
 	[scriptFilePath: string]: boolean
 }
 
-// TODO: typings for StringBuilder
-function buildScript(result: string, entryScript: ScriptInfo, readScript: readScript, path: path): string
+async function buildScript(result: string, entryScript: ScriptInfo, readScript: readScript, path: path): Promise<string>
 {
 	let allScripts: ScriptMap = {};
 	let processedScripts: ProcessedScriptMap = {};
 	let ancestors: ProcessedScriptMap = {};
 
-	let fullScript = insertSortedIncludes(entryScript, readScript, path, ancestors, processedScripts, allScripts);
+	let fullScript = await insertSortedIncludes(entryScript, readScript, path, ancestors, processedScripts, allScripts);
 
 	result = appendLine(result, fullScript);
 
 	return result;
 }
 
-function insertSortedIncludes(currentScript: ScriptInfo, readScript: readScript, path: path, currentScriptAncestors: ProcessedScriptMap, processedScripts: ProcessedScriptMap, allScripts: ScriptMap): string
+async function insertSortedIncludes(
+	currentScript: ScriptInfo,
+	readScript: readScript,
+	path: path,
+	currentScriptAncestors: ProcessedScriptMap,
+	processedScripts: ProcessedScriptMap,
+	allScripts: ScriptMap): Promise<string>
 {
-	let scriptIncludes = getScriptIncludes(currentScript, readScript, path, allScripts);
+	let scriptIncludes = await getScriptIncludes(currentScript, readScript, path, allScripts);
 
 	let result = currentScript.script;
 
@@ -132,15 +150,15 @@ function insertSortedIncludes(currentScript: ScriptInfo, readScript: readScript,
 		}
 		else
 		{
-			let childAncestors = assign({}, currentScriptAncestors);
+			let childAncestors = Object.assign({}, currentScriptAncestors);
 			childAncestors[currentScript.scriptFilePath] = true;
 
-			includeValue = insertSortedIncludes(scriptInclude.script, readScript, path, childAncestors, processedScripts, allScripts);
+			includeValue = await insertSortedIncludes(scriptInclude.script, readScript, path, childAncestors, processedScripts, allScripts);
 			includeValue = shaderNewLine + includeValue + shaderNewLine;
 
 			processedScripts[scriptInclude.script.scriptFilePath] = true
 		}
-		
+
 		result = beforeInclude + includeValue + afterInclude;
 		includeMatchOffset += (includeValue.length - scriptInclude.includeMatchLength);
 	}
@@ -155,7 +173,11 @@ interface IncludeInfo
 	includeMatchLength: number;
 }
 
-function getScriptIncludes(script: ScriptInfo, readScript: readScript, path: path, allScripts: ScriptMap): IncludeInfo[]
+async function getScriptIncludes(
+	script: ScriptInfo,
+	readScript: readScript,
+	path: path,
+	allScripts: ScriptMap): Promise<IncludeInfo[]>
 {
 	let includes: IncludeInfo[] = [];
 
@@ -179,7 +201,7 @@ function getScriptIncludes(script: ScriptInfo, readScript: readScript, path: pat
 			{
 				includeScript =
 					{
-						script: readShaderScript(includeFilePath, readScript),
+						script: await readShaderScript(includeFilePath, readScript),
 						scriptFilePath: includeFilePath,
 						scriptFolderPath: includeFolderPath,
 						scriptFileName: includeFileName
@@ -203,9 +225,9 @@ function getScriptIncludes(script: ScriptInfo, readScript: readScript, path: pat
 	return includes;
 }
 
-function readShaderScript(path: string, readScript: readScript): string
+async function readShaderScript(path: string, readScript: readScript): Promise<string>
 {
-	let script = readScript(path);
+	let script = await readScript(path);
 	return fixLineEndings(script);
 }
 
@@ -214,7 +236,7 @@ function fixLineEndings(source: string)
 	return source.replace("\r\n", shaderNewLine);
 }
 
-function appendLine(currentValue: string, lineToAppend: string) : string
+function appendLine(currentValue: string, lineToAppend: string): string
 {
 	if ((null === lineToAppend) || (undefined === lineToAppend))
 	{
