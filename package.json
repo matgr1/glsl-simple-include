@@ -1,0 +1,33 @@
+{
+  "name": "glsl-simple-include",
+  "version": "0.0.0",
+  "description": "Support for a simple \"#pragma include\" directive int shader files",
+  "keywords": [
+    "glsl"
+  ],
+  "author": "matgr1",
+  "license": "MIT",
+  "main": "build/glsl-simple-include.js",
+  "files": [
+    "build/glsl-simple-include.d.ts",
+    "build/glsl-simple-include.js",
+    "build/glsl-simple-include.js.map"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/matgr1/glsl-simple-include"
+  },
+  "devDependencies": {
+    "typescript": "2.0.3"
+  },
+  "dependencies": {
+    "@types/lodash": "^4.14.37",
+    "lodash": "4.16.4",
+    "stringbuilder": "0.0.11",
+    "strip-bom": "3.0.0"
+  },
+  "scripts": {
+    "preinstall": "npm install -g typescript",
+    "build": "tsc -p ./src/tsconfig.json"
+  }
+}
