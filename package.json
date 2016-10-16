@@ -1,7 +1,7 @@
 {
   "name": "glsl-simple-include",
   "version": "0.0.6-alpha.3",
-  "description": "Support for a simple \"#pragma include\" directive int shader files",
+  "description": "Preprocessor for a simple \"#pragma include\" directive in shader files",
   "keywords": [
     "glsl"
   ],
