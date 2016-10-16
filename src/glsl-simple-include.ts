@@ -214,7 +214,12 @@ function fixLineEndings(source: string)
 	return source.replace("\r\n", shaderNewLine);
 }
 
-function appendLine(value: string, newLine: string) : string
+function appendLine(currentValue: string, lineToAppend: string) : string
 {
-	return value + newLine + shaderNewLine;
+	if ((null === lineToAppend) || (undefined === lineToAppend))
+	{
+		return currentValue;
+	}
+
+	return currentValue + lineToAppend + shaderNewLine;
 }

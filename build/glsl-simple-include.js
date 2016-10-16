@@ -117,6 +117,9 @@ function fixLineEndings(source) {
     return source.replace("\r\n", shaderNewLine);
 }
 function appendLine(value, newLine) {
+    if ((null === newLine) || (undefined === newLine)) {
+        return value;
+    }
     return value + newLine + shaderNewLine;
 }
 //# sourceMappingURL=glsl-simple-include.js.map
