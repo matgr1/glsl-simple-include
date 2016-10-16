@@ -11,7 +11,7 @@
   "files": [
     "build/**/*"
   ],
-  "typings": "build/glsl-simple-include.d.ts",
+  "typings": "build/es6/glsl-simple-include.d.ts",
   "repository": {
     "type": "git",
     "url": "https://github.com/matgr1/glsl-simple-include"
