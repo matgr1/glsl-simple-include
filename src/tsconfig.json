@@ -6,6 +6,7 @@
 		"inlineSourceMap": true,
 		"inlineSources": true,
 		"declaration": true,
+		"declarationDir": "../build",
 		"noImplicitReturns": true,
 		"noImplicitAny": true,
 		"noEmitOnError": true,
