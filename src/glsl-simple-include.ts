@@ -1,7 +1,4 @@
 declare let require: any;
-
-require("babel-polyfill");
-
 let stripBom = require("strip-bom");
 
 export type readScript = (path: string) => Promise<string>;

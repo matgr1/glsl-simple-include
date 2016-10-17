@@ -1,6 +1,6 @@
 {
   "name": "glsl-simple-include",
-  "version": "0.0.6-alpha.3",
+  "version": "0.0.6-alpha.4",
   "description": "Preprocessor for a simple \"#pragma include\" directive in shader files",
   "keywords": [
     "glsl"
@@ -22,7 +22,6 @@
     "typescript": "2.0.3"
   },
   "dependencies": {
-    "babel-polyfill": "^6.16.0",
     "strip-bom": "^3.0.0"
   },
   "babel": {
