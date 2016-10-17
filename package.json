@@ -33,6 +33,7 @@
   "scripts": {
     "build:ts": "tsc -p ./src/tsconfig.json",
     "build:babel": "babel build/es6 -d build/es5",
-    "build": "npm run build:ts && npm run build:babel"
+    "build": "npm run build:ts && npm run build:babel",
+    "prepublish": "npm run build"
   }
 }
