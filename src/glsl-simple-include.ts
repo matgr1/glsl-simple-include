@@ -27,6 +27,10 @@ export async function processIncludes(
 	{
 		entryScript = await readShaderScript(entryFilePath, readScript);
 	}
+	else
+	{
+		entryScript = fixScript(entryScript);
+	}
 
 	return await processScript(
 		{
@@ -84,7 +88,7 @@ async function processScript(
 	// build the script
 	result = await buildScript(result, entryScript, readScript, path);
 
-	return stripBom(result).trim();
+	return result.trim();
 }
 
 interface ScriptMap
@@ -225,7 +229,12 @@ async function getScriptIncludes(
 async function readShaderScript(path: string, readScript: readScript): Promise<string>
 {
 	let script = await readScript(path);
-	return fixLineEndings(script);
+	return fixScript(script);
+}
+
+function fixScript(source: string)
+{
+	return fixLineEndings(stripBom(source));
 }
 
 function fixLineEndings(source: string)
