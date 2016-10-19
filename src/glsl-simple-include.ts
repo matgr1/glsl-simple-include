@@ -1,6 +1,3 @@
-declare let require: any;
-let stripBom = require("strip-bom");
-
 export type readScript = (path: string) => Promise<string>;
 
 export interface path
@@ -29,7 +26,7 @@ export async function processIncludes(
 	}
 	else
 	{
-		entryScript = fixScript(entryScript);
+		entryScript = fixLineEndings(entryScript);
 	}
 
 	return await processScript(
@@ -229,12 +226,7 @@ async function getScriptIncludes(
 async function readShaderScript(path: string, readScript: readScript): Promise<string>
 {
 	let script = await readScript(path);
-	return fixScript(script);
-}
-
-function fixScript(source: string)
-{
-	return fixLineEndings(stripBom(source));
+	return fixLineEndings(script);
 }
 
 function fixLineEndings(source: string)
