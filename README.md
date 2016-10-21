@@ -11,7 +11,7 @@ npm install glsl-simple-include --save
 ```
 
 ```javascript
-var GlslSimpleInclude = require('read-text-file');
+var GlslSimpleInclude = require('glsl-simple-include');
 var readTextFile = require('read-text-file');
 var path = require('path');
 
