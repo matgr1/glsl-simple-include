@@ -1,17 +1,17 @@
 {
 	"compilerOptions": {
 		"noEmit": false,
-		"outDir": "../build/es6",
+		"outDir": "../build",
         "rootDir": "./",
 		"inlineSourceMap": true,
 		"inlineSources": true,
 		"declaration": true,
-		"declarationDir": "../build",
+		"declarationDir": "../dist",
 		"noImplicitReturns": true,
 		"noImplicitAny": true,
 		"noEmitOnError": true,
 		"removeComments": false,
-		"target": "es6",
+		"target": "es2015",
 		"module": "commonjs",
 		"allowSyntheticDefaultImports": true
 	}

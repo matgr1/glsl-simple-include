@@ -6,11 +6,11 @@
   ],
   "author": "matgr1",
   "license": "MIT",
-  "main": "build/es5/glsl-simple-include.js",
+  "main": "dist/glsl-simple-include.js",
   "files": [
-    "build/**/*"
+    "dist/**/*"
   ],
-  "typings": "build/glsl-simple-include.d.ts",
+  "typings": "dist/glsl-simple-include.d.ts",
   "repository": {
     "type": "git",
     "url": "https://github.com/matgr1/glsl-simple-include"
@@ -41,7 +41,7 @@
   },
   "scripts": {
     "build:ts": "tsc -p ./src/tsconfig.json",
-    "build:babel": "babel build/es6 -d build/es5",
+    "build:babel": "babel build -d dist",
     "build": "npm run build:ts && npm run build:babel",
     "prepublish": "npm run build"
   }
