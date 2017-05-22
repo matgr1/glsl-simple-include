@@ -14,11 +14,9 @@
 		"outDir": "./dist",
 		"declaration": true,
 
-		"inlineSourceMap": false,
-		"inlineSources": false,
-		"sourceMap": true,
+		"inlineSourceMap": true,
+		"inlineSources": true,
 
-		"allowSyntheticDefaultImports": true,
 		"noImplicitReturns": true,
 		"noImplicitAny": true,
 		"noEmitOnError": true,
