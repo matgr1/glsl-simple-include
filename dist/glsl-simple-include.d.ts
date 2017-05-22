@@ -4,4 +4,4 @@ export interface path {
     dirname(path: string): string;
     basename(path: string, ext?: string): string;
 }
-export declare function processIncludes(readScript: readScript, path: path, entryScriptPath: string, entryScript?: string, preprocessorDefines?: string[]): Promise<string>;
+export declare function processIncludes(readScript: readScript, path: path, entryScriptPath: string, entryScript?: string, preprocessorDefines?: string[], onDependencyLoaded?: (dependencyPath: string) => void): Promise<string>;

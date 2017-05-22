@@ -14,15 +14,17 @@ export async function processIncludes(
 	path: path,
 	entryScriptPath: string,
 	entryScript?: string,
-	preprocessorDefines?: string[]): Promise<string>
+	preprocessorDefines?: string[],
+	onDependencyLoaded?: (dependencyPath: string) => void): Promise<string>
 {
 	let entryFilePath = path.resolve(entryScriptPath);
 	let entryFolderPath = path.dirname(entryFilePath);
 	let entryFileName = path.basename(entryFilePath);
 
-	if ((null === entryScript) || (undefined === entryScript))
+	if (nullOrUndefined(entryScript))
 	{
 		entryScript = await readShaderScript(entryFilePath, readScript);
+		onDependencyLoaded(entryFilePath);
 	}
 	else
 	{
@@ -38,7 +40,8 @@ export async function processIncludes(
 		},
 		readScript,
 		path,
-		preprocessorDefines);
+		preprocessorDefines,
+		onDependencyLoaded);
 }
 
 interface ScriptInfo
@@ -53,7 +56,8 @@ async function processScript(
 	entryScript: ScriptInfo,
 	readScript: readScript,
 	path: path,
-	preprocessorDefines?: string[]): Promise<string>
+	preprocessorDefines: string[],
+	onDependencyLoaded: (dependencyPath: string) => void): Promise<string>
 {
 	// strip version
 	let versionString: string = null;
@@ -61,7 +65,7 @@ async function processScript(
 	let versionRegex = /^\s*#version .*$/m;
 	let versionMatch = versionRegex.exec(entryScript.script);
 
-	if ((null !== versionMatch) && (undefined !== versionMatch))
+	if (hasValue(versionMatch))
 	{
 		let afterVersionIndex = versionMatch.index + versionMatch[0].length;
 
@@ -73,7 +77,7 @@ async function processScript(
 	let result = "";
 	result = appendLine(result, versionString);
 
-	if ((null !== preprocessorDefines) && (undefined !== preprocessorDefines))
+	if (hasValue(preprocessorDefines))
 	{
 		preprocessorDefines.forEach(
 			function (define)
@@ -83,7 +87,7 @@ async function processScript(
 	}
 
 	// build the script
-	result = await buildScript(result, entryScript, readScript, path);
+	result = await buildScript(result, entryScript, readScript, path, onDependencyLoaded);
 
 	return result.trim();
 }
@@ -97,13 +101,18 @@ interface ProcessedScriptMap
 	[scriptFilePath: string]: boolean
 }
 
-async function buildScript(result: string, entryScript: ScriptInfo, readScript: readScript, path: path): Promise<string>
+async function buildScript(
+	result: string,
+	entryScript: ScriptInfo,
+	readScript: readScript,
+	path: path,
+	onDependencyLoaded: (dependencyPath: string) => void): Promise<string>
 {
 	let allScripts: ScriptMap = {};
 	let processedScripts: ProcessedScriptMap = {};
 	let ancestors: ProcessedScriptMap = {};
 
-	let fullScript = await insertSortedIncludes(entryScript, readScript, path, ancestors, processedScripts, allScripts);
+	let fullScript = await insertSortedIncludes(entryScript, readScript, path, ancestors, processedScripts, allScripts, onDependencyLoaded);
 
 	result = appendLine(result, fullScript);
 
@@ -116,9 +125,10 @@ async function insertSortedIncludes(
 	path: path,
 	currentScriptAncestors: ProcessedScriptMap,
 	processedScripts: ProcessedScriptMap,
-	allScripts: ScriptMap): Promise<string>
+	allScripts: ScriptMap,
+	onDependencyLoaded: (dependencyPath: string) => void): Promise<string>
 {
-	let scriptIncludes = await getScriptIncludes(currentScript, readScript, path, allScripts);
+	let scriptIncludes = await getScriptIncludes(currentScript, readScript, path, allScripts, onDependencyLoaded);
 
 	let result = currentScript.script;
 
@@ -151,7 +161,7 @@ async function insertSortedIncludes(
 			let childAncestors = Object.assign({}, currentScriptAncestors);
 			childAncestors[currentScript.scriptFilePath] = true;
 
-			includeValue = await insertSortedIncludes(scriptInclude.script, readScript, path, childAncestors, processedScripts, allScripts);
+			includeValue = await insertSortedIncludes(scriptInclude.script, readScript, path, childAncestors, processedScripts, allScripts, onDependencyLoaded);
 			includeValue = shaderNewLine + includeValue + shaderNewLine;
 
 			processedScripts[scriptInclude.script.scriptFilePath] = true
@@ -175,11 +185,12 @@ async function getScriptIncludes(
 	script: ScriptInfo,
 	readScript: readScript,
 	path: path,
-	allScripts: ScriptMap): Promise<IncludeInfo[]>
+	allScripts: ScriptMap,
+	onDependencyLoaded: (dependencyPath: string) => void): Promise<IncludeInfo[]>
 {
 	let includes: IncludeInfo[] = [];
 
-	if ((null !== script) && (undefined !== script))
+	if (hasValue(script))
 	{
 		let regex = /^\#pragma include \"(.*)\"$/gm;
 
@@ -195,7 +206,7 @@ async function getScriptIncludes(
 
 			let includeScript = allScripts[includeFilePath];
 
-			if ((null === includeScript) || (undefined === includeScript))
+			if (nullOrUndefined(includeScript))
 			{
 				includeScript =
 					{
@@ -204,6 +215,9 @@ async function getScriptIncludes(
 						scriptFolderPath: includeFolderPath,
 						scriptFileName: includeFileName
 					};
+
+				onDependencyLoaded(includeFilePath);
+
 				allScripts[includeFilePath] = includeScript;
 			}
 
@@ -236,10 +250,20 @@ function fixLineEndings(source: string)
 
 function appendLine(currentValue: string, lineToAppend: string): string
 {
-	if ((null === lineToAppend) || (undefined === lineToAppend))
+	if (nullOrUndefined(lineToAppend))
 	{
 		return currentValue;
 	}
 
 	return currentValue + lineToAppend + shaderNewLine;
+}
+
+function hasValue(obj: any): boolean
+{
+	return (false == nullOrUndefined(obj));
+}
+
+function nullOrUndefined(obj: any): boolean
+{
+	return (obj === null) || (obj === undefined);
 }
