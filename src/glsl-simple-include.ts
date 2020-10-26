@@ -152,11 +152,7 @@ async function insertSortedIncludes(
 
 		let includeValue: string = "";
 
-		if (processedScripts[scriptInclude.script.scriptFilePath])
-		{
-			console.log(`Script ${scriptInclude.script.scriptFilePath} already included`);
-		}
-		else
+		if (!processedScripts[scriptInclude.script.scriptFilePath])
 		{
 			let childAncestors = Object.assign({}, currentScriptAncestors);
 			childAncestors[currentScript.scriptFilePath] = true;
