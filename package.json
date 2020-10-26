@@ -18,8 +18,7 @@
   "devDependencies": {
     "typescript": "^2.3.2"
   },
-  "dependencies": {
-  },
+  "dependencies": {},
   "scripts": {
     "build": "tsc -p ./tsconfig.json",
     "prepublish": "npm run build"
